@@ -1,0 +1,61 @@
+---
+version: '1.5'
+type: install
+name: Ghost
+logo: https://raw.githubusercontent.com/jelastic-jps/ghost/master/images/ghost-white.png
+homepage: https://ghost.org/
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/ghost/master
+
+categories:
+- apps/cms
+- apps/content-management
+
+description: 
+  text: /texts/description.md
+  short: The professional publishing platform
+
+success: 
+  /texts/success.md
+  
+globals:
+  configPath: /home/jelastic/ROOT/core/server/config
+  defaultConfig: ${globals.configPath}/defaults.json
+  configDevelopment: ${globals.configPath}/env/config.development.json
+  configProduction: ${globals.configPath}/env/config.production.json
+
+nodes:
+- cloudlets: 18
+  count: 1
+  nodeType: nodejs
+  env:
+    NODE_ENV: production
+- cloudlets: 8
+  count: 1
+  nodeType: mysql
+
+onInstall:
+- deployArchive
+- createDb
+- deployHomeDir
+- restartNodes:
+    nodeGroup: cp
+actions:
+  deployArchive:
+    deploy:
+      name: Ghost-latest
+      context: ROOT
+      archive: https://ghost.org/zip/ghost-latest.zip
+  deployHomeDir:
+    cmd[nodejs]:
+      sed -i 's|"url":\ "http:\/\/localhost:2368",|"url":"http:\/\/${env.domain}",|g' ${globals.defaultConfig};
+      sed -i 's|"host":\ "127.0.0.1",|"host":"${nodes.cp.master.intIP}",|g' ${globals.defaultConfig};
+      sed -i 's|2368|8080|g' ${globals.defaultConfig};
+      sed -i 's|"url":\ "http:\/\/localhost:2368",|"url":\ "http:\/\/${env.domain}",|g' ${globals.configDevelopment};
+      sed -i 's|"client":\ "sqlite3",|"client":\ "mysql",|g' ${globals.configDevelopment};
+      sed -i 's|"filename":\ "content\/data\/ghost-dev.db"|"host":\ "${nodes.sqldb.master.intIP}",\n"user":\ "root",\n"password":\ "${nodes.mysql.password}",\n"database":\ "ghost"|g' ${globals.configDevelopment};
+      sed -i 's|127.0.0.1|${nodes.sqldb.master.intIP}|g' ${globals.configProduction};
+      sed -i 's|"password"\ :\ ""|"password"\ :\ "${nodes.mysql.password}"|g' ${globals.configProduction};
+      cd $HOME/ROOT;
+  createDb:
+       cmd[sqldb]:
+         mysql -uroot -p${nodes.mysql.password} -e "create database ghost"
