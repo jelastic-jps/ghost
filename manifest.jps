@@ -1,6 +1,7 @@
 version: '1.5'
 appVersion: latest
 type: install
+id: ghost
 name: Ghost
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/ghost/master
 logo: /images/ghost-white.png
