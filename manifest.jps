@@ -59,5 +59,4 @@ actions:
 
   createDb:
        cmd[sqldb]:
-         mysql -uroot -p${nodes.mysql.password} -e "create database ghost"
-
+         mysql -uroot -p${nodes.mysql.password} -e "create database ghost" 2>&1 1>/dev/null
