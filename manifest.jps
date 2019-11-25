@@ -26,10 +26,12 @@ globals:
 nodes:
 - cloudlets: 18
   nodeType: nodejs
+  tag: 13.1.0-forever
   env:
     NODE_ENV: production
 - cloudlets: 8
   nodeType: mysql
+
 
 onInstall:
 - deployArchive
@@ -37,6 +39,10 @@ onInstall:
 - deployHomeDir
 - restartNodes:
     nodeGroup: [cp]
+- migration_lock_remove
+- restartNodes:
+    nodeGroup: [cp]
+
 
 actions:
   deployArchive:
@@ -60,3 +66,8 @@ actions:
   createDb:
        cmd[sqldb]:
          mysql -uroot -p${nodes.mysql.password} -e "create database ghost" 2>&1 1>/dev/null
+  
+  migration_lock_remove:
+       cmd[sqldb]:
+         mysql -uroot -p${nodes.mysql.password} -e "use ghost;UPDATE migrations_lock set locked=0 where lock_key='km01';"
+ 
