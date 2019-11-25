@@ -22,11 +22,37 @@ globals:
   defaultConfig: ${globals.configPath}/defaults.json
   configDevelopment: ${globals.configPath}/env/config.development.json
   configProduction: ${globals.configPath}/env/config.production.json
+  
+    
+onBeforeInit: |
+  var url = "https://registry.hub.docker.com/v1/repositories/jelastic/nodejs/tags";
+  var tags = toNative(new com.hivext.api.core.utils.Transport().get(url)).sort();
+  var def = "13.1.0-forever", result = "", ver = {};
+  for (var i = 0; i < tags.length; i++) {
+      ver[tags[i].name] = tags[i].name;
+      if (tags[i].name == def) {
+        ver[tags[i].name] = tags[i].name;
+        result = tags[i].name;
+        break;
+      }
+  }
+    return {
+    result:0, 
+    settings: {
+      fields: [{
+          name: "version",
+          caption: "Node.js Version",
+          type: "list",
+          values: ver,
+          "default": result
+      }]    
+    }
+  };
 
 nodes:
 - cloudlets: 18
   nodeType: nodejs
-  tag: 13.1.0-forever
+  tag: ${settings.version}
   env:
     NODE_ENV: production
 - cloudlets: 8
@@ -70,4 +96,3 @@ actions:
   migration_lock_remove:
        cmd[sqldb]:
          mysql -uroot -p${nodes.mysql.password} -e "use ghost;UPDATE migrations_lock set locked=0 where lock_key='km01';"
- 
