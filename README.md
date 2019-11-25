@@ -27,7 +27,7 @@ If you are already registered at Jelastic, you can deploy *Ghost* by importing t
 <img src="images/import.png" width="500">
 </p>
 
-In the installation wizard, if required, change settings such as *Environment Name* or *Region*. Then press __Install__ .
+In the installation wizard, if required, change settings such as *Node.js Version*, *Environment Name* or *Region*. Then press __Install__ .
 
 <p align="left">
 <img src="images/install.png" width="500">
@@ -39,6 +39,6 @@ Now you can just click on the **Open in Browser** button within the shown frame 
 <img src="images/success.png" width="370">
 </p>
 
-See more details in our [post](https://jelastic.com/blog/ghost-blogging-platform-automatic-installation-on-jelastic-paas/) how to create an owner account for your upcoming blogs.
+See more details in our [post](https://jelastic.com/blog/ghost-blogging-platform-automatic-installation/) how to create an owner account for your upcoming blogs.
 
 Congratulations! You are ready to create your awesome blogs collaborating with your teammates.
