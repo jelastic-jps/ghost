@@ -31,12 +31,11 @@ onBeforeInit: |
   for (var i = 0; i < tags.length; i++) {
       ver[tags[i].name] = tags[i].name;
       if (tags[i].name == def) {
-        ver[tags[i].name] = tags[i].name;
         result = tags[i].name;
-        break;
       }
   }
-    return {
+  
+  return {
     result:0, 
     settings: {
       fields: [{
@@ -44,7 +43,7 @@ onBeforeInit: |
           caption: "Node.js Version",
           type: "list",
           values: ver,
-          "default": result
+          "default": result || tags[0].name
       }]    
     }
   };
