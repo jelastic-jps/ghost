@@ -3,50 +3,33 @@ appVersion: latest
 type: install
 id: ghost
 name: Ghost
+
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/ghost/master
 logo: /images/ghost-white.png
 homepage: https://ghost.org/
 
 categories:
 - apps/content-management
-
 description: 
   text: /texts/description.md
   short: The professional publishing platform
 
 success: 
   /texts/success.md
-  
+
 globals:
   configPath: /home/jelastic/ROOT/core/server/config
   defaultConfig: ${globals.configPath}/defaults.json
   configDevelopment: ${globals.configPath}/env/config.development.json
   configProduction: ${globals.configPath}/env/config.production.json
-  
-    
-onBeforeInit: |
-  var url = "https://registry.hub.docker.com/v1/repositories/jelastic/nodejs/tags";
-  var tags = toNative(new com.hivext.api.core.utils.Transport().get(url)).sort();
-  var def = "13.1.0-forever", result = "", ver = {};
-  for (var i = 0; i < tags.length; i++) {
-      ver[tags[i].name] = tags[i].name;
-      if (tags[i].name == def) {
-        result = tags[i].name;
-      }
-  }
-  
-  return {
-    result:0, 
-    settings: {
-      fields: [{
-          name: "version",
-          caption: "Node.js Version",
-          type: "list",
-          values: ver,
-          "default": result || tags[0].name
-      }]    
-    }
-  };
+ 
+settings:
+  fields:
+    name: version
+    nodeType: nodejs
+    caption: Node.js Version
+    type: dockertags
+    hidden: false    
 
 nodes:
 - cloudlets: 18
@@ -57,7 +40,6 @@ nodes:
 - cloudlets: 8
   nodeType: mysql
 
-
 onInstall:
 - deployArchive
 - createDb
@@ -67,7 +49,6 @@ onInstall:
 - migration_lock_remove
 - restartNodes:
     nodeGroup: [cp]
-
 
 actions:
   deployArchive:
