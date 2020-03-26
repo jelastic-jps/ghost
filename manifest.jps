@@ -3,42 +3,32 @@ appVersion: latest
 type: install
 id: ghost
 name: Ghost
-
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/ghost/master
 logo: /images/ghost-white.png
 homepage: https://ghost.org/
 
-categories:
-- apps/content-management
+categories: apps/content-management
+
 description: 
   text: /texts/description.md
   short: The professional publishing platform
 
-success: 
-  /texts/success.md
-
+success: /texts/success.md
+  
 globals:
   configPath: /home/jelastic/ROOT/core/server/config
   defaultConfig: ${globals.configPath}/defaults.json
   configDevelopment: ${globals.configPath}/env/config.development.json
   configProduction: ${globals.configPath}/env/config.production.json
- 
-settings:
-  fields:
-    name: version
-    nodeType: nodejs
-    caption: Node.js Version
-    type: dockertags
-    hidden: false    
 
 nodes:
 - cloudlets: 18
-  nodeType: nodejs
-  tag: ${settings.version}
+  nodeType: nodejs8-forever
   env:
     NODE_ENV: production
 - cloudlets: 8
   nodeType: mysql
+
 
 onInstall:
 - deployArchive
@@ -49,6 +39,7 @@ onInstall:
 - migration_lock_remove
 - restartNodes:
     nodeGroup: [cp]
+
 
 actions:
   deployArchive:
