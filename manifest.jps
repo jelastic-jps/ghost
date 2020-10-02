@@ -24,7 +24,7 @@ globals:
 
 nodes:
 - cloudlets: 18
-  nodeType: nodejs8-forever
+  nodeType: nodejs10-forever
   env:
     NODE_ENV: production
 - cloudlets: 8
