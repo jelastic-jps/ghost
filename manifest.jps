@@ -27,9 +27,9 @@ nodes:
   nodeType: nodejs10-forever
   env:
     NODE_ENV: production
+    PACKAGE_MANAGER: yarn
 - cloudlets: 8
   nodeType: mysql
-
 
 onInstall:
 - deployArchive
