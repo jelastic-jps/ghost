@@ -17,14 +17,14 @@ description:
 success: /texts/success.md
   
 globals:
-  configPath: /home/jelastic/ROOT/core/server/config
+  configPath: /home/jelastic/ROOT/core/shared/config
   defaultConfig: ${globals.configPath}/defaults.json
   configDevelopment: ${globals.configPath}/env/config.development.json
   configProduction: ${globals.configPath}/env/config.production.json
 
 nodes:
 - cloudlets: 18
-  nodeType: nodejs10-forever
+  nodeType: nodejs14-forever
   env:
     NODE_ENV: production
     PACKAGE_MANAGER: yarn
@@ -47,7 +47,7 @@ actions:
     deploy:
       name: Ghost-latest
       context: ROOT
-      archive: https://download.jelastic.com/public.php?service=files&t=89c95da37d36c166e32bc0edcd32b38d&download
+      archive: https://github.com/TryGhost/Ghost/releases/download/v4.5.0/Ghost-4.5.0.zip
 
   deployHomeDir:
     cmd[cp]:
