@@ -47,7 +47,7 @@ actions:
     deploy:
       name: Ghost-latest
       context: ROOT
-      archive: https://github.com/TryGhost/Ghost/releases/download/v4.5.0/Ghost-4.5.0.zip
+      archive: https://github.com/TryGhost/Ghost/releases/download/v4.32.2/Ghost-4.32.2.zip
 
   deployHomeDir:
     cmd[cp]:
