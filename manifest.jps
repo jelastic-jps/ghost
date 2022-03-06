@@ -7,6 +7,9 @@ baseUrl: https://raw.githubusercontent.com/jelastic-jps/ghost/master
 logo: /images/ghost-white.png
 homepage: https://ghost.org/
 
+mixins:
+  - configs/vers.yaml
+
 categories: 
 - apps/content-management
 
@@ -47,7 +50,7 @@ actions:
     deploy:
       name: Ghost-latest
       context: ROOT
-      archive: https://github.com/TryGhost/Ghost/releases/download/v4.32.2/Ghost-4.32.2.zip
+      archive: https://github.com/TryGhost/Ghost/releases/download/v${globals.version_ghost}/Ghost-${globals.version_ghost}.zip
 
   deployHomeDir:
     cmd[cp]:
