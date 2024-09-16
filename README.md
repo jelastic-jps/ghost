@@ -16,11 +16,11 @@ This package is intended for bloggers to simplify Ghost publishing platform inst
  
 ### Deployment
 
-In order to get this solution instantly deployed, click the **DEPLOY TO JELASTIC** button, specify your email address within the widget, choose one of the [Jelastic Public Cloud providers](https://jelastic.cloud/) and press Install.
+In order to get this solution instantly deployed, click the **Deploy to Cloud** button, specify your email address within the widget, choose one of the [Virtuozzo Public Cloud Providers](https://www.virtuozzo.com/application-platform-partners/) and press Install.
 
-[![Deploy](https://github.com/jelastic-jps/git-push-deploy/raw/master/images/deploy-to-jelastic.png)](https://jelastic.com/install-application/?manifest=https://raw.githubusercontent.com/jelastic-jps/ghost/master/manifest.jps) 
+[![Deploy](https://raw.githubusercontent.com/jelastic-jps/common/main/images/deploy-to-cloud.png)](https://virtuozzo.com/install-application/?manifest=https://raw.githubusercontent.com/jelastic-jps/ghost/master/manifest.jps) 
 
-If you are already registered at Jelastic, you can deploy *Ghost* by importing the required manifest using the link from GitHub:
+If you are already registered at Virtuozzo Application Platform (VAP), you can deploy *Ghost* by importing the required manifest using the link from GitHub:
 [https://github.com/jelastic-jps/ghost/blob/master/manifest.jps](https://github.com/jelastic-jps/ghost/blob/master/manifest.jps)
 
 <p align="left"> 
@@ -39,6 +39,6 @@ Now you can just click on the **Open in Browser** button within the shown frame 
 <img src="images/success.png" width="370">
 </p>
 
-See more details in our [post](https://jelastic.com/blog/ghost-blogging-platform-automatic-installation/) how to create an owner account for your upcoming blogs.
+See more details in our [post](https://www.virtuozzo.com/company/blog/ghost-blogging-platform-automatic-installation/) how to create an owner account for your upcoming blogs.
 
 Congratulations! You are ready to create your awesome blogs collaborating with your teammates.
