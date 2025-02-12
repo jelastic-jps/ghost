@@ -1,6 +1,5 @@
-version: '1.5'
-appVersion: latest
 type: install
+jpsVersion: 8.3.1
 id: ghost
 name: Ghost
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/ghost/master
@@ -18,56 +17,88 @@ description:
   short: The professional publishing platform
 
 success: /texts/success.md
-  
-globals:
-  configPath: /home/jelastic/ROOT/core/shared/config
-  defaultConfig: ${globals.configPath}/defaults.json
-  configDevelopment: ${globals.configPath}/env/config.development.json
-  configProduction: ${globals.configPath}/env/config.production.json
 
-nodes:
-- cloudlets: 18
-  nodeType: nodejs16-forever
-  env:
-    NODE_ENV: production
-    PACKAGE_MANAGER: yarn
-- cloudlets: 8
-  nodeType: mysql
+onBeforeInstall: |
+  return {
+    result: 0,
+    ssl: !!jelastic.billing.account.GetQuotas('environment.jelasticssl.enabled').array[0].value,
+    nodes: [{
+      nodeType: "nodejs20-pm2",
+      cloudlets: 16,
+      env: {
+        NODE_ENV: "production"
+      },
+      nodeGroup: "cp"
+    }, {
+      nodeType: "mysql",
+      cloudlets: 8,
+      nodeGroup: "sqldb"
+    }]
+  }
+  
+skipNodeEmails: true
+nodes: definedInOnBeforeInstall
+
+globals:
+  DB_USER: ghost-${fn.random}
+  DB_PASS: ${fn.password(10)}
+  APP_DIR: /home/jelastic/ROOT
+  PROTOCOL: http
 
 onInstall:
-- deployArchive
-- createDb
-- deployHomeDir
-- restartNodes:
-    nodeGroup: [cp]
-- migration_lock_remove
-- restartNodes:
-    nodeGroup: [cp]
-
+  - set-protocol
+  - create-db
+  - install-ghost-cli
+  - install-ghost
+  - create-pm2-ecosystem
+  - migration-lock-remove
+  - restartNodes:
+      nodeGroup: [cp]
 
 actions:
-  deployArchive:
-    deploy:
-      name: Ghost-latest
-      context: ROOT
-      archive: https://github.com/TryGhost/Ghost/releases/download/v${globals.version_ghost}/Ghost-${globals.version_ghost}.zip
-
-  deployHomeDir:
-    cmd[cp]:
-      sed -i 's|"url":\ "http:\/\/localhost:2368",|"url":"http:\/\/${env.domain}",|g' ${globals.defaultConfig};
-      sed -i 's|"host":\ "127.0.0.1",|"host":"${nodes.cp.master.intIP}",|g' ${globals.defaultConfig};
-      sed -i 's|2368|8080|g' ${globals.defaultConfig};
-      sed -i 's|"url":\ "http:\/\/localhost:2368",|"url":\ "http:\/\/${env.domain}",|g' ${globals.configDevelopment};
-      sed -i 's|"client":\ "sqlite3",|"client":\ "mysql",|g' ${globals.configDevelopment};
-      sed -i 's|"filename":\ "content\/data\/ghost-dev.db"|"host":\ "${nodes.sqldb.master.intIP}",\n"user":\ "root",\n"password":\ "${nodes.mysql.password}",\n"database":\ "ghost"|g' ${globals.configDevelopment};
-      sed -i 's|127.0.0.1|${nodes.sqldb.master.intIP}|g' ${globals.configProduction};
-      sed -i 's|"password"\ :\ ""|"password"\ :\ "${nodes.mysql.password}"|g' ${globals.configProduction};
-      cd $HOME/ROOT;
-
-  createDb:
-       cmd[sqldb]:
-         mysql -uroot -p${nodes.mysql.password} -e "create database ghost" 2>&1 1>/dev/null
   
-  migration_lock_remove:
-       cmd[sqldb]:
-         mysql -uroot -p${nodes.mysql.password} -e "use ghost;UPDATE migrations_lock set locked=0 where lock_key='km01';"
+  set-protocol:
+    - script: |
+        return {
+          result:0,
+          ssl: jelastic.billing.account.GetQuotas('environment.jelasticssl.enabled').array[0].value
+        }
+    - if (${response.ssl}):
+        setGlobals:
+          PROTOCOL: https
+  
+  create-db:
+    cmd[sqldb]: |-
+      MYSQL_PWD=${nodes.sqldb.password} mysql -uroot -e "CREATE DATABASE ghost;"
+      MYSQL_PWD=${nodes.sqldb.password} mysql -uroot -e "CREATE USER '${globals.DB_USER}'@'%' IDENTIFIED BY '${globals.DB_PASS}';"
+      MYSQL_PWD=${nodes.sqldb.password} mysql -uroot -e "GRANT ALL PRIVILEGES ON ghost.* TO '${globals.DB_USER}'@'%' WITH GRANT OPTION;"
+
+  install-ghost-cli:
+    cmd[cp]: 
+      npm install -g ghost-cli
+    
+  install-ghost:
+    cmd[cp]: |-
+      rm -rf ${globals.APP_DIR}/*;
+      ghost install ${globals.version_ghost} --url ${globals.PROTOCOL}://${env.domain} \
+      --ip ${nodes.cp.master.intIP} --port 8080 \
+      --db mysql --dbhost ${nodes.sqldb.master.intIP} --dbuser ${globals.DB_USER} --dbpass ${globals.DB_PASS} --dbname ghost \
+      --dir ${globals.APP_DIR} --no-setup-linux-user --no-setup-nginx --no-setup-ssl --no-setup-systemd --no-start;
+
+  create-pm2-ecosystem:
+    cmd[cp]: |-
+      echo "module.exports = {
+              apps : [{
+              name   : \"ghost\",
+              script : \"${globals.APP_DIR}/current/index.js\",
+              cwd : \"${globals.APP_DIR}\"
+              }]
+            }" > ${globals.APP_DIR}/ecosystem.config.js;
+      pm2 delete all; pm2 unstartup; pm2 flush;
+      pm2 start /home/jelastic/ROOT/ecosystem.config.js;
+      pm2 save;
+
+  migration-lock-remove:
+    cmd[sqldb]:
+      mysql -u${globals.DB_USER} -p${globals.DB_PASS} -e "use ghost; UPDATE migrations_lock SET locked=0 WHERE lock_key='km01';"
+      
