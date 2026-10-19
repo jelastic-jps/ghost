@@ -1,5 +1,4 @@
 type: install
-jpsVersion: 8.3.1
 id: ghost
 name: Ghost
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/ghost/master
@@ -23,7 +22,7 @@ onBeforeInstall: |
     result: 0,
     ssl: !!jelastic.billing.account.GetQuotas('environment.jelasticssl.enabled').array[0].value,
     nodes: [{
-      nodeType: "nodejs20-pm2",
+      nodeType: "nodejs24-pm2",
       cloudlets: 16,
       env: {
         NODE_ENV: "production"
